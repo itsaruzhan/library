@@ -1,0 +1,99 @@
+{% extends 'library/base.html' %}
+{% load static %}
+{% load ratings %}
+{% load crispy_forms_tags %}
+       {% block content %}
+<div class="welcome">
+	<div >
+		<h1>Welcome to the library</h1>
+		<p>Enjoy reading our amazing books!</p>
+		<button type="button" class="btn btn-dark">Get Started</button></div>
+</div>   
+        <!-- Top books -->  
+<div class="container-xl">
+	<div class="row">
+		<div class="col-md-12">
+			<h2>Top <b>Books</b></h2>
+			<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="0">
+			
+			<div class="carousel-inner">
+				<div class="item carousel-item active">
+					<div class="row">
+						
+                        {% for i in topBooks1 %}
+						<div class="col-sm-3">
+							<div class="thumb-wrapper">
+								<span class="wish-icon"><i class="fa fa-heart-o"></i></span>
+								<div class="img-box">
+                                   <img src="{{i.image.url}}" class="img img-responsive">			
+								</div>
+								<div class="thumb-content">
+									<h4>{{i.title}}</h4>									
+									<div class="star-rating">
+										<ul class="list-inline">
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star-o"></i></li>
+										</ul>
+									</div>
+									<p class="item-price"><b>{{i.author}}</b></p>
+									<a href="#" class="btn btn-primary">Add to Cart</a>
+								</div>						
+							</div>
+							
+						</div>
+                        {% endfor %}
+					</div>
+				</div>
+			</div><a href="#" class="btn btn-dark">View All</a>
+		</div>
+		</div>
+	</div>
+</div>
+
+<!-- New Books -->
+<div class="container-xl">
+	<div class="row">
+		<div class="col-md-12">
+			<h2>New <b>Books</b></h2>
+			<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="0">
+			
+			<div class="carousel-inner">
+				<div class="item carousel-item active">
+					<div class="row">
+						
+                        {% for i in newBooks1 %}
+						<div class="col-sm-3">
+							<div class="thumb-wrapper">
+								<span class="wish-icon"><i class="fa fa-heart-o"></i></span>
+								<div class="img-box">
+                                   <img src="{{i.image.url}}" class="img img-responsive">			
+								</div>
+								<div class="thumb-content">
+									<h4>{{i.title}}</h4>									
+									<div class="star-rating">
+										<ul class="list-inline">
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											<li class="list-inline-item"><i class="fa fa-star-o"></i></li>
+										</ul>
+									</div>
+									<p class="item-price"><b>{{i.author}}</b></p>
+									<a href="#" class="btn btn-dark">Add to Cart</a>
+								</div>						
+							</div>
+							
+						</div>
+                        {% endfor %}
+					</div>
+				</div>
+			</div><a href="#" class="btn btn-dark">View All</a>
+		</div>
+		</div>
+	</div>
+</div>
+ {% endblock %}
