@@ -25,7 +25,6 @@ class Student(models.Model):
     lname = models.CharField(max_length=200)
     email = models.EmailField()
     course = models.IntegerField(default=1)
-    phoneNumber = PhoneNumberField(null = False, blank = False).formfield()
     gender = models.CharField(choices=GENDER, default='None', max_length=10)
     faculty = models.CharField(choices = FACULTY, default='None', max_length=50)
     

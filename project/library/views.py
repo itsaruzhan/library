@@ -8,9 +8,16 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.db import connection
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 from .models import *
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url='login')
 def home(request):
     return render(request, 'library/home.html')
+
+@login_required(login_url='login')
+def categories(request):
+    cats = Categories.objects.all()
+    return render(request, 'library/categories.html', {'cats':cats})
 
 def register_request_student(request):
     if request.method == 'POST':
@@ -24,7 +31,6 @@ def register_request_student(request):
             user.refresh_from_db()  
             user.student.fname = form.cleaned_data.get('first_name')
             user.student.lname = form.cleaned_data.get('last_name')
-            user.student.phoneNumber = form.cleaned_data.get('phoneNumber')
             user.student.email = form.cleaned_data.get('email')
             user.student.course = form.cleaned_data.get('course')
             user.student.gender = form.cleaned_data.get('gender')
@@ -40,32 +46,6 @@ def register_request_student(request):
         form = NewStudentForm()
     print('invalid')
     return render(request, 'library/registration_student.html', {'register_form': form})
-
-def register_request_teacher(request):
-    if request.method == 'POST':
-       
-        form = NewTeacherForm(request.POST)
-        print(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()  # load the profile instance created by the signal
-           
-            
-            user.teacher.fname = form.cleaned_data.get('fname')
-            user.teacher.lname = form.cleaned_data.get('lname')
-            user.teacher.phoneNumber = form.cleaned_data.get('phoneNumber')
-            user.teacher.email = form.cleaned_data.get('email')
-            user.teacher.gender = form.cleaned_data.get('gender')
-            user.teacher.save
-            user.save()
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=user.username, password=raw_password)
-            login(request, user)
-            return redirect('home')
-
-    else:
-        form = NewTeacherForm()
-    return render(request, 'library/registration_teacher.html', {'register_form': form})
 
 def login_request(request):
   if request.method == "POST":
@@ -89,10 +69,13 @@ def login_request(request):
   form = AuthenticationForm()
   return render(request=request, template_name="library/login.html", context={"login_form":form})
 
+
+def logoutUser(request):
+    logout(request)
+    return redirect('login')
+
+@login_required(login_url='login')
 def mainpage_books(request):
-    books1 = Book.objects.filter(category_id=42)
-    books2 = Book.objects.filter(category_id=43)
-    books3 = Book.objects.filter(category_id=44)
     newBooks1=Book.objects.filter().order_by('-book_id')[:4]
     newBooks2=Book.objects.filter().order_by('-book_id')[4:8]
     newBooks3=Book.objects.filter().order_by('-book_id')[8:12]
@@ -101,13 +84,16 @@ def mainpage_books(request):
     topBooks3=Book.objects.filter().order_by('average_rating')[8:12]
     return render(request, 'library/main.html', {'newBooks1': newBooks1,'newBooks2': newBooks2, 'newBooks3': newBooks3,'topBooks1':topBooks1, 'topBooks2':topBooks2, 'topBooks3':topBooks3})
 
+@login_required(login_url='login')
 def drama_books(request):
     dramaBooks = Book.objects.filter(category_id=42)
     return render(request, 'library/drama.html', {'dramaBooks': dramaBooks})
 
+@login_required(login_url='login')
 def my_profile(request, id):
     student = User.objects.get(id=id)
     return render(request, 'library/profile.html',  context={"user":student})
+
 
 class DetailCart(DetailView):
     model = Cart

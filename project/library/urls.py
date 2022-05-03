@@ -10,9 +10,11 @@ from django.conf import settings
 
 urlpatterns = [
     path('', views.mainpage_books, name='home'),
-    path('register/', views.register_request_student, name='registration_student'),
+    path('register/', views.register_request_student, name='register'),
     path('dramas/' , views.drama_books, name='dramas'),
-    path('login/' , views.login_request, name='login_request'),
+    path('categories/' , views.categories, name='categories'),
+    path('login/' , views.login_request, name='login'),
+    path('logout/', views.logoutUser, name="logout"),
     path('profile/<int:id>', views.my_profile, name='profile'),
     path('cartitem/', views.ListCartItem.as_view(), name='list-cartitem'),
     path('cartitem/<int:pk>/', views.DetailCartItem.as_view(), name='detail-cartitem'),

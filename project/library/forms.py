@@ -18,13 +18,12 @@ class NewStudentForm(UserCreationForm):
     last_name = forms.CharField(max_length=200)
     email = forms.EmailField()
     course = forms.IntegerField()
-    phoneNumber = PhoneNumberField(null = False, blank = False).formfield()
     gender = forms.ChoiceField(choices=GENDER)
     faculty = forms.ChoiceField(choices=FACULTY)
 
     class Meta:
         model = User
-        fields = ("first_name","last_name","username",  "email","course", "phoneNumber", "gender","faculty", "password1", "password2")
+        fields = ("first_name","last_name","username",  "email","course", "gender","faculty", "password1", "password2")
         
 class NewTeacherForm(UserCreationForm):
     GENDER = [
