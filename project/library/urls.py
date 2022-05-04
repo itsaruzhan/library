@@ -1,6 +1,6 @@
 from unicodedata import name
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path
 from django.urls import re_path as url
 from . import views
 from django.conf.urls.static import static
@@ -9,7 +9,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 urlpatterns = [
-    path('', views.mainpage_books, name='home'),
+    path('home/', views.mainpage_books, name='home'),
     path('register/', views.register_request_student, name='register'),
     path('categories/' , views.categories, name='categories'),
     path('category/<slug:category_slug>', views.bookByCategory, name='bookByCategory'),
