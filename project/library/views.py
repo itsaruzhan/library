@@ -1,6 +1,7 @@
 import imp
 from django.shortcuts import render, redirect
-from .forms import NewStudentForm, NewTeacherForm
+from .forms import NewStudentForm
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import login,  authenticate, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -16,8 +17,13 @@ def home(request):
 
 @login_required(login_url='login')
 def categories(request):
-    cats = Categories.objects.all()
+    cats = Category.objects.all()
     return render(request, 'library/categories.html', {'cats':cats})
+
+@login_required(login_url='login')
+def showBooks(request):
+    return render(request, 'library/showBooks.html')
+
 
 def register_request_student(request):
     if request.method == 'POST':
@@ -84,10 +90,31 @@ def mainpage_books(request):
     topBooks3=Book.objects.filter().order_by('average_rating')[8:12]
     return render(request, 'library/main.html', {'newBooks1': newBooks1,'newBooks2': newBooks2, 'newBooks3': newBooks3,'topBooks1':topBooks1, 'topBooks2':topBooks2, 'topBooks3':topBooks3})
 
+def bookByCategory(request, category_slug):
+    cat =get_object_or_404(Category, slug=category_slug)
+    books = Book.objects.filter(category_id=cat.category_id)
+    content = {'books':books}
+    return render(request, 'library/bookByCategory.html',content)
+
 @login_required(login_url='login')
-def drama_books(request):
-    dramaBooks = Book.objects.filter(category_id=42)
+def textbooks(request):
+    textBooks = Book.objects.filter(category_id=1)
+    return render(request, 'library/textBooks.html', {'textBooks':textBooks })
+
+@login_required(login_url='login')
+def dramaBooks(request):
+    dramaBooks = Book.objects.filter(category_id=3)
     return render(request, 'library/drama.html', {'dramaBooks': dramaBooks})
+
+@login_required(login_url='login')
+def scienceBooks(request):
+    scienceBooks = Book.objects.filter(category_id=2)
+    return render(request, 'library/science.html', {'scienceBooks': scienceBooks})
+
+@login_required(login_url='login')
+def biographyBooks(request):
+    biographyBooks = Book.objects.filter(category_id=4)
+    return render(request, 'library/biography.html', {'biographyBooks': biographyBooks})
 
 @login_required(login_url='login')
 def my_profile(request, id):

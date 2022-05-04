@@ -3,10 +3,11 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from phonenumber_field.modelfields import PhoneNumberField
-from django.contrib.auth.models import AbstractUser
+from django.template.defaultfilters import slugify
+
 
 # Create your models here.
+
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -40,12 +41,21 @@ class Student(models.Model):
     def __str__(self):
         return self.user.username
     
-class Categories(models.Model):
+class Category(models.Model):
     category_id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=100)
+    description = models.TextField()
+    image =  models.ImageField(upload_to='img', blank=True, null=True)
+    slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name='URL')
+
     
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Category, self).save(*args, **kwargs)    
     
 class Book(models.Model):
     book_id = models.BigAutoField(primary_key=True)
@@ -57,8 +67,8 @@ class Book(models.Model):
     copies = models.IntegerField()
     available = models.BooleanField()
     average_rating = models.DecimalField(decimal_places=1, max_digits = 2)
-    category_id = models.ForeignKey(Categories, related_name='books', on_delete=models.DO_NOTHING)
- 
+    category_id = models.ForeignKey(Category, related_name='books', on_delete=models.DO_NOTHING)
+    description = models.TextField()
     
     def __str__(self):
         return self.title
