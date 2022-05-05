@@ -1,0 +1,31 @@
+{% extends 'library/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-center row">
+        <div class="col-md-10">
+        
+            <div class="row p-2 m-b-10 bg-white border rounded">
+                <div class="col-md-5 mt-1"><img src="{{book.image.url}}" class="product-image"></div>
+                <div class="col-md-4 mt-1">
+                    <h5>{{ book.title }}</h5>
+                    <div class="d-flex flex-row">
+                        <div class="ratings mr-2"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div><span>{{ i.average_rating }}</span>
+                    </div>
+                    <div class="mt-1 mb-1 spec-1"><span>Author: {{ book.author }}</span></div>
+                    <div class="mt-1 mb-1 spec-1"><span>Publisher: {{ book.publisher }}</span></div>
+                    <div class="mt-1 mb-1 spec-1"><span>Genre: {{ book.category_id }}</span></div>
+                    <div class="mt-1 mb-1 spec-1"><span>Edition: {{ book.edition }}</span></div>
+                    </div>
+                <div class="align-items-center align-content-center col-md-3 border-left mt-1">
+                    <h6 class="text-success">Available in library</h6>
+                    <div class="d-flex flex-column mt-4">
+                        <p>Click to get this book:</p>
+                        <button class="btn btn-outline-dark" type="button">Add to wishlist</button></div>
+                </div><p class="text-justify" style="padding-top: 20px;"><b> Description:</b> {{ book.description }}</p>
+            </div>
+           
+        </div>
+    </div>
+</div>
+{% endblock %}

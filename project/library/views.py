@@ -1,4 +1,4 @@
-import imp
+import cx_Oracle
 from django.shortcuts import render, redirect
 from .forms import NewStudentForm
 from django.shortcuts import get_object_or_404, render
@@ -61,9 +61,9 @@ def login_request(request):
       password = form.cleaned_data.get('password')
       user = authenticate(username=username, password=password)
       cursor = connection.cursor()
-    
-      cursor.execute( "declare a_date DATE := trunc(SYSDATE); begin insert into library_login(action,action_date, user_id) values(1, a_date, %d ); end; " %
-    ( user.id))          
+      cursor.callproc("user_action", [user.id])
+      cursor.close()
+      
       if user is not None:
         login(request, user)
         messages.info(request, f"You are now logged in as {username}.")
@@ -90,36 +90,26 @@ def mainpage_books(request):
     topBooks3=Book.objects.filter().order_by('average_rating')[8:12]
     return render(request, 'library/main.html', {'newBooks1': newBooks1,'newBooks2': newBooks2, 'newBooks3': newBooks3,'topBooks1':topBooks1, 'topBooks2':topBooks2, 'topBooks3':topBooks3})
 
+@login_required(login_url='login')
 def bookByCategory(request, category_slug):
     cat =get_object_or_404(Category, slug=category_slug)
     books = Book.objects.filter(category_id=cat.category_id)
-    content = {'books':books}
-    return render(request, 'library/bookByCategory.html',content)
+    content = {'books':books, 'cat': cat}
+    return render(request, 'library/booksByCat.html',content)
 
 @login_required(login_url='login')
-def textbooks(request):
-    textBooks = Book.objects.filter(category_id=1)
-    return render(request, 'library/textBooks.html', {'textBooks':textBooks })
-
-@login_required(login_url='login')
-def dramaBooks(request):
-    dramaBooks = Book.objects.filter(category_id=3)
-    return render(request, 'library/drama.html', {'dramaBooks': dramaBooks})
-
-@login_required(login_url='login')
-def scienceBooks(request):
-    scienceBooks = Book.objects.filter(category_id=2)
-    return render(request, 'library/science.html', {'scienceBooks': scienceBooks})
-
-@login_required(login_url='login')
-def biographyBooks(request):
-    biographyBooks = Book.objects.filter(category_id=4)
-    return render(request, 'library/biography.html', {'biographyBooks': biographyBooks})
+def viewBook(request, id):
+    book = Book.objects.get(book_id=id)
+    content = {'book':book}
+    return render(request, 'library/book.html',content)
 
 @login_required(login_url='login')
 def my_profile(request, id):
     student = User.objects.get(id=id)
-    return render(request, 'library/profile.html',  context={"user":student})
+    cursor = connection.cursor()
+    startYear =  cursor.callfunc('calculate_year',cx_Oracle.NUMBER , [student.student.stud_id])
+    startYear = int(startYear)
+    return render(request, 'library/profile.html',  context={"user":student, "startYear":startYear })
 
 
 class DetailCart(DetailView):
