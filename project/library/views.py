@@ -108,8 +108,10 @@ def my_profile(request, id):
     student = User.objects.get(id=id)
     cursor = connection.cursor()
     startYear =  cursor.callfunc('calculate_year',cx_Oracle.NUMBER , [student.student.stud_id])
+    debt =  cursor.callfunc('show_debt',cx_Oracle.NUMBER , [student.id])
     startYear = int(startYear)
-    return render(request, 'library/profile.html',  context={"user":student, "startYear":startYear })
+    debt = int(debt)
+    return render(request, 'library/profile.html',  context={"user":student, "startYear":startYear, "debt": debt })
 
 
 class DetailCart(DetailView):

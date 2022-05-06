@@ -86,7 +86,7 @@ class BookReturnedRecord(models.Model):
 class UserDebt(models.Model):
     debt_id = models.BigAutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cost = models.DecimalField(max_digits=3,decimal_places=2)
+    cost = models.DecimalField(max_digits=8,decimal_places=2)
     days = models.IntegerField()
     book_info = models.ForeignKey(BookReturnedRecord, on_delete=models.DO_NOTHING)
     paid = models.BooleanField() 
