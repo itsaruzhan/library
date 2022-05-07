@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import re_path as url
 from . import views
+from .views import OrderSummaryView
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -18,11 +19,9 @@ urlpatterns = [
     path('logout/', views.logoutUser, name="logout"),
     path('showBooks/', views.showBooks, name="showBooks"),
     path('profile/<int:id>', views.my_profile, name='profile'),
-    path('cartitem/', views.ListCartItem.as_view(), name='list-cartitem'),
-    path('cartitem/<int:pk>/', views.DetailCartItem.as_view(), name='detail-cartitem'),
-    path('cartitem/create/', views.CreateCartItem.as_view(), name='create-cartitem'),
-    path('cartitem/<int:pk>/update/', views.UpdateCartItem.as_view(), name='update-cartitem'),
-    path('cartitem/<int:pk>/delete/', views.DeleteCartItem.as_view(), name='delete-cartitem'),
+    path('book/<slug:book_slug>/',views.viewBook, name='book'),
+    path('add-to-cart/<slug>/',views.add_to_cart, name='add-to-cart'),
+    path('order-summary/', OrderSummaryView.as_view(), name='order-summary'),
 
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

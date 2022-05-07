@@ -3,13 +3,15 @@ from django.shortcuts import render, redirect
 from .forms import NewStudentForm
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import login,  authenticate, logout
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.db import connection
-from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView, View
 from .models import *
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 @login_required(login_url='login')
 def home(request):
@@ -98,8 +100,8 @@ def bookByCategory(request, category_slug):
     return render(request, 'library/booksByCat.html',content)
 
 @login_required(login_url='login')
-def viewBook(request, id):
-    book = Book.objects.get(book_id=id)
+def viewBook(request, book_slug):
+    book = Book.objects.get(slug = book_slug)
     content = {'book':book}
     return render(request, 'library/book.html',content)
 
@@ -114,46 +116,44 @@ def my_profile(request, id):
     return render(request, 'library/profile.html',  context={"user":student, "startYear":startYear, "debt": debt })
 
 
-class DetailCart(DetailView):
-    model = Cart
-    template_name='cart/detail_cart.html'
+@login_required
+def add_to_cart(request, book_slug):
+    item = get_object_or_404(Book, slug=book_slug)
+    order_item, created = OrderItem.objects.get_or_create(
+        item=item,
+        user=request.user,
+        ordered=False
+    )
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        # check if the order item is in the order
+        if order.items.filter(item__slug=item.slug).exists():
+            order_item.quantity += 1
+            order_item.save()
+            messages.info(request, "This item quantity was updated.")
+            return redirect("library:order-summary")
+        else:
+            order.items.add(order_item)
+            messages.info(request, "This item was added to your cart.")
+            return redirect("library:order-summary")
+    else:
+        ordered_date = timezone.now()
+        order = Order.objects.create(
+            user=request.user, ordered_date=ordered_date)
+        order.items.add(order_item)
+        messages.info(request, "This item was added to your cart.")
+        return redirect("library:order-summary")
 
-class ListCart(ListView):
-    model = Cart
-    context_object_name = 'carts'
-    template_name='cart/list_carts.html'
 
-class CreateCart(CreateView):
-    model = Cart
-    template_name = 'cart/create_cart.html'
-
-class Updatecart(UpdateView):
-    model = Cart
-    template_name = 'cart/update_cart.html'
-
-class DeleteCart(DeleteView):
-    model = Cart
-    template_name = 'cart/delete_cart.html'  
-
-class DetailCartItem(DetailView):
-    model = CartItem
-    template_name='cartitem/detail_cartitem.html'
-
-class ListCartItem(ListView):
-    model = CartItem
-    context_object_name = 'cartitems'
-    template_name='library/list_cartitems.html'
-
-class CreateCartItem(CreateView):
-    model = CartItem
-    template_name = 'cartitem/create_cartitem.html'
-
-class UpdateCartItem(UpdateView):
-    model = CartItem
-    template_name = 'cartitem/update_cartitem.html'
-
-class DeleteCartItem(DeleteView):
-    model = Cart
-    template_name = 'cartitem/delete_cartitem.html'
-
-    
+class OrderSummaryView(LoginRequiredMixin, View):
+    def get(self, *args, **kwargs):
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            context = {
+                'object': order
+            }
+            return render(self.request, 'order_summary.html', context)
+        except ObjectDoesNotExist:
+            messages.warning(self.request, "You do not have an active order")
+            return redirect("home")

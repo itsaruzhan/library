@@ -7,11 +7,8 @@ admin.site.register(Category)
 admin.site.register(BookReturnedRecord)
 admin.site.register(UserDebt)
 admin.site.register(BookRating)
-admin.site.register(Cart)
-admin.site.register(CartItem)
 admin.site.register(Login)
-class CartAdmin(admin.ModelAdmin):
-    pass
+admin.site.register(Order)
+admin.site.register(OrderItem)
 
-class CartItemAdmin(admin.ModelAdmin):
-    pass
+

@@ -1,8 +1,10 @@
 from tabnanny import verbose
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
+from django.shortcuts import reverse
 from django.template.defaultfilters import slugify
 
 
@@ -69,11 +71,21 @@ class Book(models.Model):
     average_rating = models.DecimalField(decimal_places=1, max_digits = 2)
     category_id = models.ForeignKey(Category, related_name='books', on_delete=models.DO_NOTHING)
     description = models.TextField()
+    slug = models.SlugField()
+    
+    def get_absolute_url(self):
+        return reverse("library:book", kwargs={
+            'slug': self.slug
+        })
+
+    def get_add_to_cart_url(self):
+        return reverse("core:add-to-cart", kwargs={
+            'slug': self.slug
+        })
     
     def __str__(self):
         return self.title
-    
- 
+
 class BookReturnedRecord(models.Model):
     borrower_id =  models.BigAutoField(primary_key=True)
     book_id = models.ForeignKey(Book, on_delete=models.DO_NOTHING)   
@@ -103,10 +115,29 @@ class Login(models.Model):
     action = models.BooleanField()   
     action_date = models.DateTimeField(auto_now_add=True)
 
-class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-   
-class CartItem(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+class OrderItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
+    item = models.ForeignKey(Book, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
-    cart = models.ForeignKey('Cart', on_delete=models.CASCADE)    
+
+    def __str__(self):
+        return f"{self.quantity} of {self.item.title}"
+
+    def get_amount_saved(self):
+        return self.get_total_item_price() - self.get_total_discount_item_price()
+
+
+class Order(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+   
+    items = models.ManyToManyField(OrderItem)
+    start_date = models.DateTimeField(auto_now_add=True)
+    ordered_date = models.DateTimeField()
+    ordered = models.BooleanField(default=False)
+    received = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
