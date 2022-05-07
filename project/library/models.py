@@ -74,12 +74,12 @@ class Book(models.Model):
     slug = models.SlugField()
     
     def get_absolute_url(self):
-        return reverse("library:book", kwargs={
+        return reverse("book", kwargs={
             'slug': self.slug
         })
 
     def get_add_to_cart_url(self):
-        return reverse("core:add-to-cart", kwargs={
+        return reverse("add-to-cart", kwargs={
             'slug': self.slug
         })
     

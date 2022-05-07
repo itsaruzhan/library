@@ -20,7 +20,7 @@ urlpatterns = [
     path('showBooks/', views.showBooks, name="showBooks"),
     path('profile/<int:id>', views.my_profile, name='profile'),
     path('book/<slug:book_slug>/',views.viewBook, name='book'),
-    path('add-to-cart/<slug>/',views.add_to_cart, name='add-to-cart'),
+    path('add-to-cart/<slug:book_slug>/',views.add_to_cart, name='add-to-cart'),
     path('order-summary/', OrderSummaryView.as_view(), name='order-summary'),
 
 ]
