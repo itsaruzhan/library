@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.shortcuts import reverse
 from django.template.defaultfilters import slugify
+import datetime
 
 
 # Create your models here.
@@ -80,7 +81,7 @@ class Book(models.Model):
 
     def get_add_to_cart_url(self):
         return reverse("add-to-cart", kwargs={
-            'slug': self.slug
+            'book_slug': self.slug
         })
     
     def __str__(self):
@@ -93,6 +94,11 @@ class BookReturnedRecord(models.Model):
     taken_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
     returned = models.BooleanField()
+
+    def save(self, *args, **kwargs):
+        if self.due_date is None:
+            self.due_date = datetime.datetime.now()+ datetime.timedelta(days=21)
+        super(BookReturnedRecord, self).save(*args, **kwargs)
         
 
 class UserDebt(models.Model):
@@ -121,6 +127,7 @@ class OrderItem(models.Model):
     ordered = models.BooleanField(default=False)
     item = models.ForeignKey(Book, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+    record = models.ForeignKey(BookReturnedRecord, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.quantity} of {self.item.title}"

@@ -119,10 +119,13 @@ def my_profile(request, id):
 @login_required
 def add_to_cart(request, book_slug):
     item = get_object_or_404(Book, slug=book_slug)
+    returnedBook = BookReturnedRecord.objects.create(stud_id = request.user.student, book_id = item, returned = False)
+    returnedBook.save()
     order_item, created = OrderItem.objects.get_or_create(
         item=item,
         user=request.user,
-        ordered=False
+        ordered=False,
+        record = returnedBook
     )
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
@@ -156,4 +159,4 @@ class OrderSummaryView(LoginRequiredMixin, View):
             return render(self.request, 'library/order_summary.html', context)
         except ObjectDoesNotExist:
             messages.warning(self.request, "You do not have an active order")
-            return redirect("home")
+            return render(self.request, 'library/order_summary.html')
