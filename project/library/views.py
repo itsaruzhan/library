@@ -1,4 +1,6 @@
 import cx_Oracle
+import random
+import string
 from django.shortcuts import render, redirect
 from .forms import NewStudentForm
 from django.shortcuts import get_object_or_404, render
@@ -12,6 +14,10 @@ from django.views.generic import DetailView, ListView, CreateView, UpdateView, D
 from .models import *
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+
+def create_ref_code():
+    return ''.join(random.choices(string.digits, k=4))
+
 
 @login_required(login_url='login')
 def home(request):
@@ -127,17 +133,23 @@ def add_to_cart(request, book_slug):
         ordered=False,
         record = returnedBook
     )
-    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    order_qs = Order.objects.filter(user=request.user)
     if order_qs.exists():
         order = order_qs[0]
+        order.ordered = False
         # check if the order item is in the order
         if order.items.filter(item__slug=item.slug).exists():
             order_item.quantity += 1
+            order.ordered = False
+            order.ref_code = create_ref_code()
             order_item.save()
             messages.info(request, "This item quantity was updated.")
             return redirect("order-summary")
         else:
+            order.ref_code = create_ref_code()
+            order.ordered = False
             order.items.add(order_item)
+            order.save()
             messages.info(request, "This item was added to your cart.")
             return redirect("order-summary")
     else:
@@ -145,14 +157,31 @@ def add_to_cart(request, book_slug):
         order = Order.objects.create(
             user=request.user, ordered_date=ordered_date)
         order.items.add(order_item)
+        order.ordered = False
+        order.ref_code = create_ref_code()
+        order.save()
         messages.info(request, "This item was added to your cart.")
         return redirect("order-summary")
+    
 
+@login_required
+def order_is_returned(request):
+   order = Order.objects.get(user = request.user )
+   order.ordered = True
+   items = order.items.all()
+   for i in items:
+       i.ordered = True
+       i.save()
+      
+   order.save()
+   messages.info(request, "You are take your book from library")
+   return redirect("order-summary")
+  
 
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
-            order = Order.objects.get(user=self.request.user, ordered=False)
+            order = Order.objects.get(user=self.request.user)
             context = {
                 'object': order
             }

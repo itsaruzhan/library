@@ -3,7 +3,13 @@
 {% block content %}
   <main>
     <div class="container">
-
+        {% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
     <div class="table-responsive text-nowrap">
     <h2>Order Summary</h2>
     <table class="table">
@@ -13,7 +19,7 @@
             <th scope="col">Book title</th>
             <th scope="col">Book image</th>
             <th scope="col">Quantity</th>
-            <th scope="col">Total Item Price</th>
+            <th scope="col">Order is</th>
         </tr>
         </thead>
         <tbody>
@@ -26,9 +32,12 @@
                 {{ order_item.quantity }}
             </td>
             <td>
-                <i class="fas fa-trash float-right"></i>
-            </a>
-            </td>
+                {% if order_item.ordered %}
+            <p>Book is taken</p>
+                {% else %} 
+            <p>Book is not taken</p>   
+            {% endif %} 
+            </td> 
         </tr>
     
         {% empty %}
@@ -41,9 +50,17 @@
             </td>
         </tr>
         {% endfor %}
+        {% if object.ordered %}
+        <p>You already take your ordered books</p>
+        {% else %} 
+        <p>Tell this code to the librarian: <span> {{object.ref_code }}</span></p>
+        <a class='btn btn-dark float-right' href="{% url 'order_is_returned' %}">I take all books</a>
+        {% endif %}
+        
         </tbody>
     </table>
-
+   
+   
     </div>
 
     </div>
